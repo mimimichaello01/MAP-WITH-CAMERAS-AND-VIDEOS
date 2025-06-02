@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+alembic
+asyncpg
+psycopg2-binary
+pydantic-settings
+pyjwt[crypto]
+bcrypt
+pydantic[email]
