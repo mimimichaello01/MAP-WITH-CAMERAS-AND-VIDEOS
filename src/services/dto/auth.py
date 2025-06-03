@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
 
@@ -11,6 +12,9 @@ class CreateUserDTO(BaseModel):
 class UserAuthDTO(BaseModel):
     email: EmailStr
     password: str
+
+
+
 
 
 class RefreshTokenDTO(BaseModel):

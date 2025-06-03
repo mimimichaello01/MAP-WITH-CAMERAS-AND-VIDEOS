@@ -9,3 +9,4 @@ pydantic-settings
 pyjwt[crypto]
 bcrypt
 pydantic[email]
+python-jose 

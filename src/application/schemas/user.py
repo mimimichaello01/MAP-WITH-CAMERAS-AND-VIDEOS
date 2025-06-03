@@ -37,3 +37,12 @@ class TokenPairResponse(BaseModel):
 
 class RefreshTokenSchema(BaseModel):
     refresh_token: str
+
+
+class UserProfileSchema(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+
+    class Config:
+        from_attributes = True

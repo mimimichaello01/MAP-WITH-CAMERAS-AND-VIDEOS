@@ -28,3 +28,4 @@ class AuthRepositoryImpl(AbstractAuthrepository):
         await self.session.commit()
         await self.session.refresh(user)
         return user
+

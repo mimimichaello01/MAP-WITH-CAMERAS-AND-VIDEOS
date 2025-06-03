@@ -2,6 +2,10 @@ import bcrypt
 import jwt
 from src.settings.config import auth_jwt
 
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 
 def encode_jwt(
     payload: dict,

@@ -1,10 +1,11 @@
 from fastapi import APIRouter, FastAPI
 from src.presentation.api.routers.auth_routers import auth_router
-
+from src.presentation.api.routers.profile_routers import profile_router
 
 api_router = APIRouter(prefix="/api/v1")
 
 api_router.include_router(auth_router)
+api_router.include_router(profile_router)
 
 def create_app() -> FastAPI:
     app = FastAPI(
