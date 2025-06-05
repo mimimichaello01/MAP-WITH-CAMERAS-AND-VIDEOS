@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from src.infra.auth.utils_jwt import decode_jwt, encode_jwt, validate_password
+from src.infra.auth.utils_jwt import decode_jwt, encode_jwt, hash_password, validate_password
 from src.infra.db.models.user import User
 from src.infra.db.repositories.auth_repository_impl import AuthRepositoryImpl
 from src.services.dto.auth import CreateUserDTO, TokenPairDTO, UserAuthDTO
@@ -12,27 +12,33 @@ class AuthServiceImpl(AbstractAuthService):
     def __init__(self, auth_repo: AuthRepositoryImpl):
         self.auth_repo = auth_repo
 
-    async def register_user(self, data: CreateUserDTO) -> None:
-        user = await self.auth_repo.get_by_email(data.email)
-        if user:
-            raise HTTPException(
-                status_code=400, detail="Пользователь с таким email уже зарегистрирован"
-            )
+    async def register_user(self, data: CreateUserDTO) -> User:
+        existing_user = await self.auth_repo.get_by_email(data.email)
+        if existing_user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Пользователь с таким email уже зарегистрирован.")
 
-        await self.auth_repo.create_user(
+        hashed_pwd = hash_password(data.password)
+
+        user = User(
             email=data.email,
             first_name=data.first_name,
             last_name=data.last_name,
-            password=data.password,
+            hashed_password=hashed_pwd,
         )
+
+        await self.auth_repo.create_user(user)
+        await self.auth_repo.session.commit()
+        await self.auth_repo.session.refresh(user)
+
+        return user
 
     async def authenticate_user(self, data: UserAuthDTO) -> TokenPairDTO:
         user = await self.auth_repo.get_by_email(data.email)
         if not user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный email или пароль")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный email или пароль.")
 
         if not validate_password(data.password, user.hashed_password):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный email или пароль")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неверный email или пароль.")
 
         access_token = encode_jwt(
             payload={
@@ -53,16 +59,16 @@ class AuthServiceImpl(AbstractAuthService):
     async def refresh_tokens(self, refresh_token: str) -> TokenPairDTO:
         payload = decode_jwt(refresh_token)
         if payload.get("type") != "refresh":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недопустимый тип токена")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Недопустимый тип токена.")
         user_email = payload.get("sub")
         if not user_email:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Отсутствует идентификатор пользователя"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Отсутствует идентификатор пользователя."
             )
 
         user = await self.auth_repo.get_by_email(user_email)
         if not user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Пользователь не найден")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Пользователь не найден.")
 
         access_token = encode_jwt(
             payload={

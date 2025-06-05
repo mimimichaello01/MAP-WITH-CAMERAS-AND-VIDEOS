@@ -9,4 +9,5 @@ pydantic-settings
 pyjwt[crypto]
 bcrypt
 pydantic[email]
-python-jose 
+python-jose
+redis==6.2.0
