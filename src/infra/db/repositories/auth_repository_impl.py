@@ -2,7 +2,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from src.application.interfaces.auth_repository import AbstractAuthRepository
-from src.infra.auth.utils_jwt import hash_password
+
 from src.infra.db.models.user import User
 
 

@@ -9,6 +9,7 @@ services:
     command: uvicorn --factory src.main:create_app --reload --host 0.0.0.0 --port 8000
     volumes:
       - .:/app
+      - tmp_data:/tmp
     ports:
       - "8000:8000"
     env_file:
@@ -36,5 +37,39 @@ services:
     ports:
       - "6379:6379"
 
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery-worker
+    command: celery -A src.infra.celery.celery_app:celery_app worker --queues videos
+    volumes:
+      - .:/app
+      - tmp_data:/tmp
+    depends_on:
+      - redis
+      - db
+      - main-app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Web UI
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+
 volumes:
   pgdata:
+  minio_data:
+  tmp_data:

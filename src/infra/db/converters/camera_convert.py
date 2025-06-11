@@ -1,5 +1,5 @@
 from typing import Sequence
-from src.services.dto.camera import CameraDTO
+from src.application.dto.camera import CameraDTO
 
 
 def camera_to_feature(camera: CameraDTO) -> dict:

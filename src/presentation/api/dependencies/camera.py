@@ -4,7 +4,11 @@ from src.infra.db.repositories.camera_repository_impl import CameraRepositoryImp
 from src.infra.db.session import get_db
 from src.services.camera_service_impl import CameraServiceImpl
 
+def get_camera_repository(db = Depends(get_db)) -> CameraRepositoryImpl:
+    return CameraRepositoryImpl(db)
 
-def get_camera_service(db = Depends(get_db)) -> CameraServiceImpl:
-    repo = CameraRepositoryImpl(db)
+
+def get_camera_service(
+    repo: CameraRepositoryImpl = Depends(get_camera_repository)
+) -> CameraServiceImpl:
     return CameraServiceImpl(repo)
