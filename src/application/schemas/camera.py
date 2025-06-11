@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
@@ -41,6 +41,3 @@ class CreateCameraSchema(BaseModel):
     camera_longitude: float
     archive: bool
     azimuth: Optional[int]
-
-
-

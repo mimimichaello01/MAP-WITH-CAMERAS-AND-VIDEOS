@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.services.dto.auth import CreateUserDTO, TokenPairDTO, UserAuthDTO
+from src.application.dto.auth import CreateUserDTO, TokenPairDTO, UserAuthDTO
 
 
 class AbstractAuthService(ABC):

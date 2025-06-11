@@ -14,9 +14,6 @@ class UserAuthDTO(BaseModel):
     password: str
 
 
-
-
-
 class RefreshTokenDTO(BaseModel):
     refresh_token: str
 

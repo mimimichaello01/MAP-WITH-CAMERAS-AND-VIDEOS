@@ -3,10 +3,10 @@ from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from src.infra.db.convertes.camera_convert import cameras_to_geojson
+from src.infra.db.converters.camera_convert import cameras_to_geojson
 from src.infra.db.models.camera import Camera
 from src.infra.db.repositories.camera_repository_impl import CameraRepositoryImpl
-from src.services.dto.camera import CameraDTO, CreateCameraDTO
+from src.application.dto.camera import CameraDTO, CreateCameraDTO
 from src.services.interfaces.camera_service import AbstractCameraService
 from src.infra.redis.redis import redis_client
 
@@ -15,9 +15,16 @@ class CameraServiceImpl(AbstractCameraService):
     def __init__(self, camera_repo: CameraRepositoryImpl):
         self.camera_repo = camera_repo
 
+    async def camera_to_dto(self, camera: Camera) -> CameraDTO:
+        has_video = await self.camera_repo.has_video(camera.id)
+        dto = CameraDTO.model_validate(camera)
+        dto.has_video = has_video
+        return dto
+
     async def get_all_cameras(self) -> Sequence[CameraDTO]:
         cameras = await self.camera_repo.get_all_cameras()
-        return [CameraDTO.model_validate(camera) for camera in cameras]
+        dtos = [await self.camera_to_dto(camera) for camera in cameras]
+        return dtos
 
     async def get_all_cameras_geojson(self):
         cached = await redis_client.get("geojson:cameras")
@@ -37,7 +44,25 @@ class CameraServiceImpl(AbstractCameraService):
                 status_code=status.HTTP_404_NOT_FOUND, detail="Камера не найдена."
             )
 
-        return CameraDTO.model_validate(camera)
+        return await self.camera_to_dto(camera)
+
+    async def filter_cameras(
+        self,
+        search: Optional[str],
+        camera_type: Optional[str],
+        has_video: Optional[bool],
+        videos_min: Optional[int] = None,
+        videos_max: Optional[int] = None,
+    ) -> Sequence[CameraDTO]:
+        cameras = await self.camera_repo.filter_cameras(
+            search=search,
+            camera_type=camera_type,
+            has_video=has_video,
+            videos_min=videos_min,
+            videos_max=videos_max,
+        )
+        dtos = [await self.camera_to_dto(camera) for camera in cameras]
+        return dtos
 
     async def add_camera(self, data: CreateCameraDTO) -> CameraDTO:
         existing_camera = await self.camera_repo.get_camera_by_camera_id(data.camera_id)

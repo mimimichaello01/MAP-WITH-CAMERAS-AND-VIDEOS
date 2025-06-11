@@ -24,6 +24,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 from src.infra.db.models.user import User
 from src.infra.db.models.camera import Camera
+from src.infra.db.models.video import Video
 target_metadata = Base.metadata
 config.set_main_option("sqlalchemy.url", ASYNC_DATABASE_URL)
 # other values from the config, defined by the needs of env.py,

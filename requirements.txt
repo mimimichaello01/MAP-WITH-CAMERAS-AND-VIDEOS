@@ -11,3 +11,9 @@ bcrypt
 pydantic[email]
 python-jose
 redis==6.2.0
+ffmpeg==1.4
+minio
+python-multipart
+celery[redis]
+aiofiles
+

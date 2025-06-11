@@ -8,7 +8,7 @@ from src.application.schemas.user import (
 )
 from src.presentation.api.dependencies.auth import get_auth_service
 from src.services.auth_service_impl import AuthServiceImpl
-from src.services.dto.auth import CreateUserDTO, UserAuthDTO
+from src.application.dto.auth import CreateUserDTO, UserAuthDTO
 
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])

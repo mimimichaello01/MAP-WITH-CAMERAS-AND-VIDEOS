@@ -1,15 +1,15 @@
 from datetime import datetime, timezone
-from uuid import uuid4
+from uuid import uuid4, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Boolean, DateTime, Float, Integer, String
 from src.infra.db.session import Base
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID as SQLUUID
 
 
 class Camera(Base):
     __tablename__ = "cameras"
 
-    id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
+    id: Mapped[UUID] = mapped_column(SQLUUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
     camera_id: Mapped[str] = mapped_column(String, comment="Номер камеры")
     camera_class_cd: Mapped[int] = mapped_column(Integer, comment="Идентификатор класса камеры")
     camera_class: Mapped[str] = mapped_column(String, comment="Класс камеры")
