@@ -1,11 +1,13 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
-from src.infra.auth.utils_jwt import JWTManager, get_jwt_manager
-from src.infra.auth.utils_password import PasswordHasher, get_password_hasher
+from src.infra.auth.utils_jwt import JWTManager
+from src.infra.auth.utils_password import PasswordHasher
 from src.infra.db.models.user import User
 from src.infra.db.repositories.auth_repository_impl import AuthRepositoryImpl
 from src.infra.db.session import get_db
+from src.presentation.api.dependencies.jwt_dep import get_jwt_manager
+from src.presentation.api.dependencies.password_dep import get_password_hasher
 from src.services.auth_service_impl import AuthServiceImpl
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)

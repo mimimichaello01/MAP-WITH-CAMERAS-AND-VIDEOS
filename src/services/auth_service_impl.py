@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 
-from src.infra.auth.utils_jwt import JWTManager, get_jwt_manager
-from src.infra.auth.utils_password import PasswordHasher, get_password_hasher
+from src.infra.auth.utils_jwt import JWTManager
+from src.infra.auth.utils_password import PasswordHasher
 from src.infra.db.models.user import User
 from src.infra.db.repositories.auth_repository_impl import AuthRepositoryImpl
 from src.application.dto.auth import CreateUserDTO, TokenPairDTO, UserAuthDTO

@@ -9,5 +9,3 @@ class PasswordHasher:
     def verify(self, password: str, hashed_password: str) -> bool:
         return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
-def get_password_hasher() -> PasswordHasher:
-    return PasswordHasher()

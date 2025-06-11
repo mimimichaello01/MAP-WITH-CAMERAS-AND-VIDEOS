@@ -1,23 +1,19 @@
 from datetime import datetime
-import io
 from pathlib import Path
-import tempfile
 from typing import List, Optional
 from uuid import UUID, uuid4
 
 import aiofiles
 from celery import Celery
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy import Sequence
 
 
 from src.application.dto.video import VideoFilterParams, VideoOutDTO, VideoStatusDTO
-from src.application.interfaces.video_repository import AbstractVideoRepository
 from src.infra.db.converters.video_mappers import video_to_dto
 from src.infra.db.converters.video_time_converter import date_to_datetime_end, date_to_datetime_start, time_to_seconds
 from src.infra.db.models.video import TimeOfDay, TracingStatus, Video
 from src.infra.db.repositories.video_repository_impl import VideoRepositoryImpl
-from src.infra.minio.minio_uploader import client, minio_settings
+
 from src.services.interfaces.video_service import AbstractVideoService
 
 

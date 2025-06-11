@@ -11,14 +11,19 @@ from src.infra.external_services.video_processing.thumbnail import extract_thumb
 from src.infra.external_services.video_processing.video_processing import (
     extract_video_metadata,
 )
-from src.infra.minio.image_storage import image_storage
-from src.infra.minio.video_storage import video_storage
+
+from src.infra.minio.minio_storage import MinioStorage
+from src.presentation.api.dependencies.minio import get_minio_client
+
 
 
 async def process_video(video_id: str, user_id: str, path: str):
     video_uuid = UUID(video_id)
     video_path = Path(path)
 
+    minio_client = get_minio_client()
+    video_storage = MinioStorage(client=minio_client, bucket_name="videos")
+    image_storage = MinioStorage(client=minio_client, bucket_name="images")
     async with AsyncSessionLocal() as session:
         video_repo = VideoRepositoryImpl(session)
 
@@ -31,11 +36,14 @@ async def process_video(video_id: str, user_id: str, path: str):
 
             minio_video_path = await asyncio.to_thread(
                 video_storage.upload,
-                user_id=user_id,
-                file_path=video_path,
+                user_id,
+                video_path
             )
+
             minio_thumbnail_path = await asyncio.to_thread(
-                image_storage.upload, user_id=user_id, image_path=Path(thumbnail_path)
+                image_storage.upload,
+                user_id,
+                Path(thumbnail_path)
             )
 
             video = await video_repo.get_video_by_id(video_uuid)
@@ -56,12 +64,15 @@ async def process_video(video_id: str, user_id: str, path: str):
             raise e
 
 
-@celery_app.task(bind=True, name="process_video_task", max_retries=3, default_retry_delay=10)
+@celery_app.task(
+    bind=True, name="process_video_task", max_retries=3, default_retry_delay=10
+)
 def process_video_task(self, video_id: str, user_id: str, video_path: str):
     loop = asyncio.get_event_loop()
     try:
         return loop.run_until_complete(process_video(video_id, user_id, video_path))
     except Exception as exc:
+
         async def increment_counter():
             async with AsyncSessionLocal() as session:
                 video_repo = VideoRepositoryImpl(session)
@@ -69,5 +80,6 @@ def process_video_task(self, video_id: str, user_id: str, video_path: str):
                 if video:
                     video.counter += 1
                     await session.commit()
+
         loop.run_until_complete(increment_counter())
         raise self.retry(exc=exc)
